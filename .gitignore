@@ -1,0 +1,7 @@
+build/
+build-*/
+cb/
+cmake-build-*/
+*.user
+.idea/
+*.iml
