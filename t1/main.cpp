@@ -11,6 +11,8 @@
 
 #include "./cubevao.h"
 
+// Here we draw to the back buffer, then read pixels
+
 using namespace std;
 using namespace std::chrono;
 using namespace MotokoGL;
@@ -35,7 +37,7 @@ static glm::vec3 randUV3() {
 //=============================================================
 int main() {
     srand(time(NULL));
-    Window window(1000, 750, "Goblin OpenGL Test 1");  // The Window
+    Window window(1000, 750, "Goblin OpenGL Test 1", 3, 3, true);  // The Window
     const float aspectRatio = 1.0f * window.getWidth() / window.getHeight(); // Need for the camera
     int width = window.getWidth();
     int height = window.getHeight();
@@ -114,9 +116,10 @@ int main() {
             prog.setMatCM(cam, model); // Set matrices
             cubeVao.draw(); // Draw
         }
-        window.swapBuffers(); // The actual draw
+//        window.swapBuffers(); // The actual draw
 
         // Read pixels
+        glReadBuffer(GL_BACK);
         glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, frame.data);
         flip(frame, frame, 0);
 

@@ -9,6 +9,8 @@
 
 #include "./cubevao.h"
 
+// This is a reference example, simple OpenGL draw
+
 using namespace std;
 using namespace std::chrono;
 using namespace MotokoGL;

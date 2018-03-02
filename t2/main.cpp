@@ -11,6 +11,8 @@
 
 #include "./cubevao.h"
 
+// This example draws to a framebuffer, then reads pixes to OpenCV Mat
+
 using namespace std;
 using namespace std::chrono;
 using namespace MotokoGL;
@@ -35,7 +37,7 @@ static glm::vec3 randUV3() {
 //=============================================================
 int main() {
     srand(time(NULL));
-    Window window(1000, 750, "Goblin OpenGL Test 2", 3, 3, false);  // The Window
+    Window window(1000, 750, "Goblin OpenGL Test 2", 3, 3, true);  // The Window
     const float aspectRatio = 1.0f * window.getWidth() / window.getHeight(); // Need for the camera
     int width = window.getWidth();
     int height = window.getHeight();
@@ -79,6 +81,22 @@ int main() {
     namedWindow("Goblin OpenCV 2");
 
     //-------------------------------------------
+    // Frame and render buffers
+    GLuint fbo, renderBuf, depthBuf;
+    glGenFramebuffers(1, &fbo);
+    glGenRenderbuffers(1, &renderBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBuf);
+//    cout << "err = " << hex << glGetError() << dec << endl;
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBuf);
+    // Depth buffer
+    glGenRenderbuffersEXT(1, &depthBuf);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthBuf);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,  width, height);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthBuf);
+
+    //-------------------------------------------
     // GLFW game loop
     using DSeconds = duration<double>;
     auto time1 = high_resolution_clock::now();
@@ -114,9 +132,10 @@ int main() {
             prog.setMatCM(cam, model); // Set matrices
             cubeVao.draw(); // Draw
         }
-        window.swapBuffers(); // The actual draw
+//        window.swapBuffers(); // The actual draw
 
         // Read pixels
+//        glReadBuffer(GL_COLOR_ATTACHMENT0);
         glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, frame.data);
         flip(frame, frame, 0);
 
@@ -137,5 +156,11 @@ int main() {
 //        this_thread::sleep_for(chrono::milliseconds(15));
     }
     cout << "See ya soon !" << endl;
+
+    // Delete stuff
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteRenderbuffers(1, &renderBuf);
+    glDeleteRenderbuffersEXT(1, &depthBuf);
+
     return 0;
 }
